@@ -6,6 +6,7 @@ import { logIn } from "../apis/apiCalls";
 import { NotificationContext } from "../contexts/NotificationContext";
 import Input from "./Input";
 import SubmitBtn from "./SubmitBtn";
+import { setUser } from "../utils/localStorage"; // Utility to set user data in local storage
 
 const LoginForm = () => {
     const notify = useContext(NotificationContext);
@@ -16,7 +17,10 @@ const LoginForm = () => {
         mutationFn: (formData) => logIn(formData),
         onSuccess: (data) => {
             notify("success", data.message);
-            localStorage.setItem("user", JSON.stringify(data.user));
+            setFormData({ email: "", password: "" });
+            setErrors({});
+            setUser(data.user);
+            // Assuming setUser is a function to set user data in local storage or context
             navigate("/home");
         },
         onError: (error) => {
