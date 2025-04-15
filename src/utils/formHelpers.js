@@ -14,17 +14,24 @@ export const handleInputChange = (e, setFormData, setErrors = null) => {
         }));
     }
 };
-
-export const handleImageChange = (file, setFormData) => {
-    if (file) {
+export const handleFileChange = (e, setFormData) => {
+    if (e.target.files.length > 0) {
+        const file = e.target.files[0]; // get the first file from the input
         const reader = new FileReader();
+        const { name } = e.target; // name of the file (e.g., "document.pdf")
+        console.log(e.target);
+        
         reader.onloadend = () => {
             setFormData((prev) => ({
                 ...prev,
-                image: file,
-                imagePreview: reader.result,
+                [name]: file, 
+                "target" : e.target,                // store the actual file under its name
+                [`${name}Preview`]: reader.result, // store preview (usually for images)
             }));
         };
-        reader.readAsDataURL(file);
+
+        reader.readAsDataURL(file); // this creates a base64 preview for images / files
+
+
     }
 };
