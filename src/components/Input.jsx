@@ -45,11 +45,11 @@ export default function Input({
 		<>
 			{/* Label */}
 			{label && (
-				<label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+				<label className="block mb-1 ml-1 text-sm font-medium text-gray-700 dark:text-gray-300">
 					{label}
 				</label>
 			)}
-			<div className="relative mb-4">
+			<div className="relative mb-4 left-1">
 				{/* Optional Icon */}
 				{Icon && (
 					<Icon className={`absolute left-3 top-1/2 transform -translate-y-1/2  w-5 h-5 ${error ? "text-red-500" : "text-gray-400"}`} />
@@ -60,10 +60,13 @@ export default function Input({
 					type={inputType}
 					id={name}
 					name={name}
+					onClick={(e) => e.target.showPicker?.()} // Clear errors on focus
 					value={value}
 					onChange={(e) => handleInputChange(e, setFormData, setErrors)}
 					placeholder={placeholder}
-					className={`w-full m-0 ${Icon && ("pl-10")} px-3 py-3 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 
+					className={`w-full m-0 ${Icon && ("pl-10")} 
+								${type === "date" ? "appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer" : ""}
+ 								px-3 py-3 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 
                             ${error
 							? "border-red-500 text-red-500 focus:border-red-500 focus:ring-red-500"
 							: "border-gray-300 dark:border-gray-600"

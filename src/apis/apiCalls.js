@@ -6,7 +6,7 @@ export const logIn = async (formData) => {
 }
 export const register = async (data) => {
   const response = await apiClient.post('/register/', data,);
-  return response.data 
+  return response.data
 }
 
 export const logOut = async () => {
@@ -68,7 +68,7 @@ export const completeProfile = async (data) => {
 
 export const sendResetPasswordCode = async (data) => {
   console.log(data);
-  
+
   const response = await apiClient.post(`/send-reset-password-code`, data)
   return response.data
 }
@@ -154,7 +154,7 @@ export const updatePost = async (postId, formData) => {
   });
   return response.data;
 };
-// File: components/api/apiCalls.js
+// File: components/apis/apiCalls.js
 export const sendFriendRequest = async (userId) => {
   const response = await apiClient.post(`/friend-request/${userId}`);
   return response.data;
