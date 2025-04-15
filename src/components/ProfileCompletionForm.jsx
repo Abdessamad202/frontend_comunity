@@ -7,6 +7,7 @@ import { completeProfile } from '../apis/apiCalls';
 import { handleInputChange } from '../utils/formHelpers'; // Utility function to handle input changes
 import SubmitBtn from './SubmitBtn';
 import Input from './Input'; // Input component for form fields
+import { setUser } from './../utils/localStorage';
 const ProfileCompletionForm = () => {
   const notify = useContext(NotificationContext);
   // Navigation
@@ -31,6 +32,7 @@ const ProfileCompletionForm = () => {
     mutationFn: (formData) => completeProfile(formData),
     onSuccess: (data) => {
       notify("success", data.message);
+      setUser(data.user); // Update user data in local storage
       navigate('/home');
     },
     onError: (error) => {
@@ -57,7 +59,7 @@ const ProfileCompletionForm = () => {
     e.preventDefault();
     completeProfileMutation(formData); // Call the mutation with form data
     console.log(formData);
-    
+
     // setErrors({}); // Clear previous errors
   };
 
@@ -87,6 +89,7 @@ const ProfileCompletionForm = () => {
         required={true}
         icon={Calendar}
         error={errors.date_of_birth}
+        max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
       />
 
       {/* Gender Selection - Radio Buttons */}
