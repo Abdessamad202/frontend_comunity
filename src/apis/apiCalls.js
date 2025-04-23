@@ -171,3 +171,18 @@ export const changePassword = async (data) => {
   const response = await apiClient.patch(`/change-password`, data)
   return response.data
 }
+export const getConversations = async ({pageParam = 1}) => {
+  const response = await apiClient.get(`/conversations?page=${pageParam}`)
+  return response.data
+}
+export const sendMessage = async (conversation,message) => {
+const response = await apiClient.post(`/messages/${conversation}`, message);
+  return response.data;
+};
+export const typing = async (conversationId) => {
+  const response = await apiClient.post(`/typing`,{conversationId})
+}
+export const readMessages = async (conversationId) => {
+  const response = await apiClient.post(`/read-messages/${conversationId}`)
+  return response.data
+}

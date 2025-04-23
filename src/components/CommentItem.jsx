@@ -4,23 +4,20 @@ import { formatDistanceToNow } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { NotificationContext } from "../contexts/NotificationContext";
 import { updateComment } from "../apis/apiCalls";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import useUser from "../hooks/useUser";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 const fallbackImage = "https://placehold.co/600x400?text=No+Image";
 
 export default function CommentItem({
     comment,
-    editingComment,
-    setEditingComment,
-    editedContent,
-    setEditedContent,
-    cancelEdit,
-    openDeleteConfirm,
     post
 }) {
     const queryClient = useQueryClient();
+    const [editingComment, setEditingComment] = useState(null);
+    const [editedContent, setEditedContent] = useState("");
     const notify = useContext(NotificationContext);
     const { id } = useParams()
     const { user } = useUser();
@@ -134,10 +131,20 @@ export default function CommentItem({
         },
     });
 
+    useEffect(() => {
+        cancelEdit();
+    }, []);
 
+
+    const cancelEdit = () => {
+        setEditingComment(null);
+        setEditedContent("");
+    };
     const handleEditComment = (comment) => {
         setEditingComment(comment.id);
+        console.log("editing comment", editingComment);
         setEditedContent(comment.content);
+        console.log("editing comment", editingComment);
     };
 
     const handleUpdateComment = (e) => {
@@ -150,92 +157,118 @@ export default function CommentItem({
             data: { content: editedContent }
         });
     };
+    useEffect(() => {
+        if (editingComment) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+    }, [editingComment]);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [commentToDelete, setCommentToDelete] = useState(null);
+    const openDeleteConfirm = (commentId) => {
+        setCommentToDelete(commentId);
+        setShowDeleteConfirm(true);
+    };
 
+    const closeDeleteConfirm = () => {
+        setShowDeleteConfirm(false);
+        setCommentToDelete(null);
+    };
     return (
-        <div className="flex space-x-3">
-            <img
-                src={comment.user?.profile?.picture || fallbackImage}
-                alt={`${comment?.user?.profile?.name || 'User'}'s avatar`}
-                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-            />
-            <div className="flex-1">
-                <div className={`${isCommentOwner ? 'bg-indigo-50' : 'bg-gray-100'} p-3 rounded-2xl relative`}>
-                    <div className="flex justify-between items-start">
-                        <div className="font-medium text-gray-800 text-sm flex items-center">
-                            {comment.user?.profile?.name}
-                            {isCommentOwner && (
-                                <span className="ml-2 text-xs bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full">
-                                    You
-                                </span>
-                            )}
-                        </div>
-                        <div className="flex space-x-1">
-                            {isCommentOwner && (
-                                <button
-                                    onClick={() => handleEditComment(comment)}
-                                    className="p-1 text-gray-400 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50"
-                                    aria-label="Edit comment"
-                                >
-                                    <Edit className="w-3.5 h-3.5" />
-                                </button>
-                            )}
-                            {(isPostOwner || isCommentOwner) && (
-                                <button
-                                    onClick={() => openDeleteConfirm(comment.id)}
-                                    className="p-1 text-gray-400 hover:text-red-600 transition-colors rounded-full hover:bg-red-50"
-                                    aria-label="Delete comment"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                            )}
-                        </div>
-
-                    </div>
-
-                    {editingComment === comment.id ? (
-                        <form onSubmit={handleUpdateComment} className="mt-2">
-                            <textarea
-                                value={editedContent}
-                                onChange={(e) => setEditedContent(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                                rows="2"
-                                placeholder="Edit your comment..."
-                                aria-label="Edit comment"
-                                autoFocus
-                            />
-                            <div className="flex justify-end mt-2 space-x-2">
-                                <button
-                                    type="button"
-                                    onClick={cancelEdit}
-                                    className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${!editedContent.trim()
-                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                        : 'bg-indigo-500 text-white hover:bg-indigo-600'
-                                        }`}
-                                    disabled={!editedContent.trim()}
-                                >
-                                    Save
-                                </button>
+        <>
+            <div className="flex space-x-3">
+                <img
+                    src={comment.user?.profile?.picture || fallbackImage}
+                    alt={`${comment?.user?.profile?.name || 'User'}'s avatar`}
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                />
+                <div className="flex-1">
+                    <div className={`${isCommentOwner ? 'bg-indigo-50' : 'bg-gray-100'} p-3 rounded-2xl relative`}>
+                        <div className="flex justify-between items-start">
+                            <div className="font-medium text-gray-800 text-sm flex items-center">
+                                {comment.user?.profile?.name}
+                                {isCommentOwner && (
+                                    <span className="ml-2 text-xs bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full">
+                                        You
+                                    </span>
+                                )}
                             </div>
-                        </form>
-                    ) : (
-                        <div className="mt-1">
-                            <p className="text-gray-700 text-sm break-words">{comment?.content}</p>
-                            {comment?.created_at !== comment?.updated_at && (
-                                <span className="text-xs text-gray-400 italic mt-1 block">(edited)</span>
-                            )}
+                            <div className="flex space-x-1">
+                                {isCommentOwner && (
+                                    <button
+                                        onClick={() => handleEditComment(comment)}
+                                        className="p-1 text-gray-400 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50"
+                                        aria-label="Edit comment"
+                                    >
+                                        <Edit className="w-3.5 h-3.5" />
+                                    </button>
+                                )}
+                                {(isPostOwner || isCommentOwner) && (
+                                    <button
+                                        onClick={() => openDeleteConfirm(comment.id)}
+                                        className="p-1 text-gray-400 hover:text-red-600 transition-colors rounded-full hover:bg-red-50"
+                                        aria-label="Delete comment"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                )}
+                            </div>
+
                         </div>
-                    )}
-                </div>
-                <div className="flex items-center mt-1 text-xs text-gray-500">
-                    <span>{formatDistanceToNow(new Date(comment?.created_at), { addSuffix: true })}</span>
+
+                        {editingComment === comment.id ? (
+                            <form onSubmit={handleUpdateComment} className="mt-2">
+                                <textarea
+                                    value={editedContent}
+                                    onChange={(e) => setEditedContent(e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                                    rows="2"
+                                    placeholder="Edit your comment..."
+                                    aria-label="Edit comment"
+                                    autoFocus
+                                />
+                                <div className="flex justify-end mt-2 space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={cancelEdit}
+                                        className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${!editedContent.trim()
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-indigo-500 text-white hover:bg-indigo-600'
+                                            }`}
+                                        disabled={!editedContent.trim()}
+                                    >
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="mt-1">
+                                <p className="text-gray-700 text-sm break-words">{comment?.content}</p>
+                                {comment?.created_at !== comment?.updated_at && (
+                                    <span className="text-xs text-gray-400 italic mt-1 block">(edited)</span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex items-center mt-1 text-xs text-gray-500">
+                        <span>{formatDistanceToNow(new Date(comment?.created_at), { addSuffix: true })}</span>
+                    </div>
                 </div>
             </div>
-        </div>
+            {showDeleteConfirm && (
+                <DeleteConfirmationModal
+                    post={post}
+                    commentToDelete={commentToDelete}
+                    onClose={closeDeleteConfirm}
+                />
+            )}
+        </>
     );
 }

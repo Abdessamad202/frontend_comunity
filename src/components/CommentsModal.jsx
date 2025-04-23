@@ -6,27 +6,17 @@ import Modal from "./Modal";
 import ModalHeader from "./ModalHeader";
 import AddCommentForm from "./AddCommentForm";
 export default function CommentsModal({ post, toggleModal, isCommentsModalOpen }) {
-  const [editingComment, setEditingComment] = useState(null);
-  const [editedContent, setEditedContent] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
   useEffect(() => {
-    if (showDeleteConfirm || editingComment) {
+    if (showDeleteConfirm ) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-  }, [showDeleteConfirm, editingComment]);
-
-  useEffect(() => {
-    cancelEdit();
-  }, []);
+  }, [showDeleteConfirm]);
 
 
-  const cancelEdit = () => {
-    setEditingComment(null);
-    setEditedContent("");
-  };
 
   const openDeleteConfirm = (commentId) => {
     setCommentToDelete(commentId);
@@ -50,11 +40,6 @@ export default function CommentsModal({ post, toggleModal, isCommentsModalOpen }
                   <CommentItem
                     key={i}
                     comment={comment}
-                    editingComment={editingComment}
-                    setEditingComment={setEditingComment}
-                    editedContent={editedContent}
-                    setEditedContent={setEditedContent}
-                    cancelEdit={cancelEdit}
                     openDeleteConfirm={openDeleteConfirm}
                     post={post}
                   />
@@ -72,13 +57,7 @@ export default function CommentsModal({ post, toggleModal, isCommentsModalOpen }
         </div>
         <AddCommentForm post={post} />
       </Modal>
-      {showDeleteConfirm && (
-        <DeleteConfirmationModal
-          post={post}
-          commentToDelete={commentToDelete}
-          onClose={closeDeleteConfirm}
-        />
-      )}
+      
     </>
   );
 }

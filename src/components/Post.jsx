@@ -97,7 +97,7 @@ export default function Post({ post, className }) {
             <PostActions
                 isLiked={isLiked}
                 isSaved={isSaved}
-               post={post}
+                post={post}
                 toggleModal={toggleCommentsModal}
             />
             {isCommentsModalOpen && (

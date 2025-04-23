@@ -22,6 +22,8 @@ import SettingsPage from './pages/SettingsPage'
 // import PasswordInput from './components/PasswordInput'
 import { useState } from 'react'
 import ConversationUI from './pages/ConversationsUI'
+import Conversations from './pages/Conversations'
+import TestChat from './components/TestChat'
 function App() {
   const [state, setState] = useState('')
   return (
@@ -45,10 +47,11 @@ function App() {
             <Route path='/profile/:id' element={<ProfilePage />} />
             <Route path='/posts/:id' element={<PostPage />} />
             <Route path='/settings' element={<SettingsPage />} />
-            <Route path='/messages' element={<ConversationUI />} />
+            <Route path='/messages' element={<Conversations />} />
           </Route>
 
         </Route>
+        <Route path='/testchat' element={<TestChat />} />
         {/* <Route path='/modal' element={<ModalPage />} />
         <Route path='/post' element={<PostPage />} /> */}
 

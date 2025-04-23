@@ -20,7 +20,7 @@ import { NotificationContext } from "../contexts/NotificationContext";
 import useUser from "../hooks/useUser";
 import Post from "../components/Post";
 import ProfileEditModal from "../components/ProfileEditModal";
-import FriendItem from "../components/FriendItem"; 
+import FriendItem from "../components/FriendItem";
 import PostSkeleton from "../components/PostSkeleton";
 
 const ProfilePage = () => {
@@ -36,7 +36,7 @@ const ProfilePage = () => {
     isLoading,
     error,
   } = useProfile(userId);
-  
+
   const isProfileOwner = currentUser?.id == userId;
 
   // Friend request mutations
@@ -144,14 +144,14 @@ const ProfilePage = () => {
   };
 
   return (
-    <motion.main 
+    <motion.main
       className="pt-20 pb-16 max-w-4xl mx-auto px-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
       {/* Profile Header */}
-      <motion.section 
+      <motion.section
         className="bg-white rounded-lg shadow-md mb-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -160,7 +160,7 @@ const ProfilePage = () => {
         <div className="h-40 bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-t-lg" />
         <div className="px-6 pb-6">
           <div className="flex justify-between items-end -mt-14">
-            <motion.div 
+            <motion.div
               className="h-28 w-28 rounded-full border-4 border-white bg-gray-100 overflow-hidden"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -197,7 +197,7 @@ const ProfilePage = () => {
             )}
           </div>
 
-          <motion.div 
+          <motion.div
             className="mt-4"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -245,7 +245,7 @@ const ProfilePage = () => {
               ) : (
                 <>
                   {user?.profile?.location && (
-                    <motion.span 
+                    <motion.span
                       className="flex items-center"
                       whileHover={{ color: "#4F46E5", scale: 1.02 }}
                     >
@@ -254,7 +254,7 @@ const ProfilePage = () => {
                     </motion.span>
                   )}
                   {user?.profile?.website && (
-                    <motion.span 
+                    <motion.span
                       className="flex items-center"
                       whileHover={{ scale: 1.02 }}
                     >
@@ -286,7 +286,7 @@ const ProfilePage = () => {
                 </>
               ) : (
                 <>
-                  <motion.div 
+                  <motion.div
                     className="flex items-center space-x-1"
                     whileHover={{ color: "#4F46E5", scale: 1.05 }}
                   >
@@ -294,7 +294,7 @@ const ProfilePage = () => {
                     <span className="text-gray-900">{user?.friends_count || 0}</span>
                     <span className="text-gray-500 font-normal">Friends</span>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     className="flex items-center space-x-1"
                     whileHover={{ color: "#4F46E5", scale: 1.05 }}
                   >
@@ -310,7 +310,7 @@ const ProfilePage = () => {
       </motion.section>
 
       {/* Profile Tabs */}
-      <motion.nav 
+      <motion.nav
         className="bg-white rounded-lg shadow-md mb-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -352,7 +352,7 @@ const ProfilePage = () => {
                   ))}
                 </div>
               ) : error ? (
-                <motion.div 
+                <motion.div
                   className="text-center py-8 bg-white rounded-lg shadow-md border border-red-200"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -364,19 +364,15 @@ const ProfilePage = () => {
               ) : user?.posts?.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {user.posts.map((post, i) => (
-                    <motion.div 
+
+                    <Post post={post}
                       key={`post-${post.id || i}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: i * 0.1 }}
-                      whileHover={{ scale: 1.01, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
-                    >
-                      <Post post={post} className="rounded-xl" />
-                    </motion.div>
+                      className={"rounded-lg shadow-md"}
+                    />
                   ))}
                 </div>
               ) : (
-                <motion.div 
+                <motion.div
                   className="text-center py-8 bg-white rounded-lg shadow-md"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -414,7 +410,7 @@ const ProfilePage = () => {
                   ))}
                 </div>
               ) : error ? (
-                <motion.div 
+                <motion.div
                   className="text-center py-8 bg-white rounded-lg shadow-md border border-red-200"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -434,12 +430,12 @@ const ProfilePage = () => {
                       transition={{ duration: 0.3, delay: i * 0.1 }}
                       whileHover={{ scale: 1.01, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", borderColor: "#E0E7FF" }}
                     >
-                      <FriendItem friend={friend} isProfileOwner={isProfileOwner}  />
+                      <FriendItem friend={friend} isProfileOwner={isProfileOwner} />
                     </motion.div>
                   ))}
                 </div>
               ) : (
-                <motion.div 
+                <motion.div
                   className="text-center py-8 bg-white rounded-lg shadow-md"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

@@ -4,23 +4,25 @@ import { useContext, useEffect, useState } from "react";
 import { ThumbsUp } from "lucide-react";
 import useUser from "../hooks/useUser";
 import { NotificationContext } from "../contexts/NotificationContext";
+import { useParams } from "react-router";
 
 export default function ToggleLikeBtn({ isLiked, post }) {
     const { user } = useUser();
     const queryClient = useQueryClient();
     const notify = useContext(NotificationContext);
+    const {id} = useParams()
     const likeMutation = useMutation({
         mutationFn: (postId) => toggleLikePost(postId),
 
         onMutate: async (postId) => {
             await queryClient.cancelQueries({ queryKey: ["posts"] });
             await queryClient.cancelQueries({ queryKey: ["likers", postId] });
-            await queryClient.cancelQueries({ queryKey: ["profile", user.id] });
+            await queryClient.cancelQueries({ queryKey: ["profile", id || String(user.id)] });
             await queryClient.cancelQueries({ queryKey: ["post", String(postId)] });
 
             const previousPosts = queryClient.getQueryData(["posts"]);
             const previousLikers = queryClient.getQueryData(["likers", postId]);
-            const previousProfileData = queryClient.getQueryData(["profile", user.id]);
+            const previousProfileData = queryClient.getQueryData(["profile", id || String(user.id)]);
             const previousPost = queryClient.getQueryData(["post", String(postId)]);
 
             // Optimistically update "posts"
@@ -56,7 +58,7 @@ export default function ToggleLikeBtn({ isLiked, post }) {
             });
 
             // Optimistically update "profile"
-            queryClient.setQueryData(["profile", user.id], (oldProfile) => {
+            queryClient.setQueryData(["profile", id || String(user.id)], (oldProfile) => {
                 if (!oldProfile) return oldProfile;
                 return {
                     ...oldProfile,
@@ -89,7 +91,7 @@ export default function ToggleLikeBtn({ isLiked, post }) {
         onError: (err, postId, context) => {
             queryClient.setQueryData(["posts"], context.previousPosts);
             queryClient.setQueryData(["likers", postId], context.previousLikers);
-            queryClient.setQueryData(["profile", user.id], context.previousProfileData);
+            queryClient.setQueryData(["profile", id || String(user.id)], context.previousProfileData);
             queryClient.setQueryData(["post", String(postId)], context.previousPost);
             notify("error", "Failed to update like status");
             console.error("Error liking post:", err);
@@ -98,7 +100,7 @@ export default function ToggleLikeBtn({ isLiked, post }) {
         onSettled: (data, error, postId) => {
             queryClient.invalidateQueries({ queryKey: ["posts"] });
             queryClient.invalidateQueries({ queryKey: ["likers", postId] });
-            queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+            queryClient.invalidateQueries({ queryKey: ["profile", id || String(user.id)] });
             queryClient.invalidateQueries({ queryKey: ["post", String(postId)] });
         },
     });

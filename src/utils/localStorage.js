@@ -24,7 +24,7 @@ export const setUser = (user) => {
     }
 }
 export const getToken = () => {
-    const { token } = JSON.parse(localStorage.getItem('user'));
+    const { token } = JSON.parse(localStorage.getItem('user')) || '';
     if (token) {
         return token;
     } else {
@@ -33,7 +33,7 @@ export const getToken = () => {
     }
 }
 export const isFullAuth = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(localStorage.getItem('user')) || {};
     if (user.registration_status === "completed" && user.token) {
         return true;
     }
