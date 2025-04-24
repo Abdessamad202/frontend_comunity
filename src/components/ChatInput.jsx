@@ -52,38 +52,7 @@ const ChatInput = ({ activeConvId ,conversations , setIsTyping ,isTyping }) => {
     };
     const sendMessageMutation = useMutation({
         mutationFn: (message) => sendMessage(activeConvId, message),
-        onMutate: async (newMessage) => {
-            await queryClient.cancelQueries(['conversations']);
-            const previousConversations = queryClient.getQueryData(['conversations']);
-            const updatedConversations = conversations.map(convo => {
-                if (convo.id === activeConvId) {
-                    return {
-                        ...convo,
-                        messages: [
-                            ...convo.messages,
-                            {
-                                id: convo.messages.length + 1,
-                                sender_id: user.id,
-                                content: newMessage.content,
-                                created_at: new Date().toISOString(),
-                                updated_at: new Date().toISOString(),
-                                read_at: null,
-                            }
-                        ],
-                        last_message_at: new Date().toISOString(),
-                    };
-                }
-                return convo;
-            });
-            queryClient.setQueryData(['conversations'], {
-                ...previousConversations,
-                pages: previousConversations.pages.map(page => ({
-                    ...page,
-                    conversations: updatedConversations,
-                })),
-            });
-            return { previousConversations };
-        },
+        
         onError: (err, newMessage, context) => {
             log("Error sending message: ", err);
             queryClient.setQueryData(['conversations'], context.previousConversations);

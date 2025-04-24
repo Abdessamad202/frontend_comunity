@@ -348,7 +348,7 @@ export default function ChatContent({ activeConvId, showSidebar, setShowSidebar,
 
         chatChannel.bind('message-sent', (data) => {
             console.log("Received via Pusher: ", data);
-
+            // if (data.message.sender_id === user.id) return;
             queryClient.setQueryData(['conversations'], (oldData) => {
                 if (!oldData) return oldData;
 
@@ -361,13 +361,13 @@ export default function ChatContent({ activeConvId, showSidebar, setShowSidebar,
                                 // Prepare new message
                                 let newMessage = data.message;
 
-                                // If it's the current user's sent message, mark it as read
-                                if (data.message.sender_id === user.id) {
-                                    newMessage = {
-                                        ...newMessage,
-                                        read_at: new Date().toISOString()
-                                    };
-                                }
+                                // // If it's the current user's sent message, mark it as read
+                                // if (data.message.sender_id === user.id) {
+                                //     newMessage = {
+                                //         ...newMessage,
+                                //         read_at: new Date().toISOString()
+                                //     };
+                                // }
 
                                 return {
                                     ...conv,

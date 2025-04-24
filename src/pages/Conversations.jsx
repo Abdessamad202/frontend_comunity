@@ -18,47 +18,47 @@ export default function Conversations() {
     const queryClient = useQueryClient();
     const { user } = useUser()
 
-    const readMessagesMutation = useMutation({
-        mutationFn: (conversationId) => readMessages(conversationId),
-        onMutate: async (conversationId) => {
-            await queryClient.cancelQueries(['conversations']);
-            const previousConversations = queryClient.getQueryData(['conversations']);
+    // const readMessagesMutation = useMutation({
+    //     mutationFn: (conversationId) => readMessages(conversationId),
+    //     onMutate: async (conversationId) => {
+    //         await queryClient.cancelQueries(['conversations']);
+    //         const previousConversations = queryClient.getQueryData(['conversations']);
 
-            queryClient.setQueryData(['conversations'], (oldData) => {
-                if (!oldData) return oldData;
+    //         queryClient.setQueryData(['conversations'], (oldData) => {
+    //             if (!oldData) return oldData;
 
-                return {
-                    ...oldData,
-                    pages: oldData.pages.map(page => ({
-                        ...page,
-                        conversations: page.conversations.map(conv => {
-                            if (conv.id === conversationId) {
-                                return {
-                                    ...conv,
-                                    messages: conv.messages.map(msg => {
-                                        if (msg.sender_id !== user.id) {
-                                            return { ...msg, read_at: new Date().toISOString() };
-                                        }
-                                        return msg;
-                                    }),
-                                    unreaded_count: 0
-                                };
-                            }
-                            return conv;
-                        })
-                    }))
-                };
-            });
+    //             return {
+    //                 ...oldData,
+    //                 pages: oldData.pages.map(page => ({
+    //                     ...page,
+    //                     conversations: page.conversations.map(conv => {
+    //                         if (conv.id === conversationId) {
+    //                             return {
+    //                                 ...conv,
+    //                                 messages: conv.messages.map(msg => {
+    //                                     if (msg.sender_id !== user.id) {
+    //                                         return { ...msg, read_at: new Date().toISOString() };
+    //                                     }
+    //                                     return msg;
+    //                                 }),
+    //                                 unreaded_count: 0
+    //                             };
+    //                         }
+    //                         return conv;
+    //                     })
+    //                 }))
+    //             };
+    //         });
 
-            return { previousConversations };
-        },
-        onError: (err, newMessage, context) => {
-            queryClient.setQueryData(['conversations'], context.previousConversations);
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries(['conversations']);
-        }
-    });
+    //         return { previousConversations };
+    //     },
+    //     onError: (err, newMessage, context) => {
+    //         queryClient.setQueryData(['conversations'], context.previousConversations);
+    //     },
+    //     onSettled: () => {
+    //         queryClient.invalidateQueries(['conversations']);
+    //     }
+    // });
     // useEffect(() => {
     //     if (!activeConversation) return;
     //     const chatChannelName = `chat.${activeConversation}`;
@@ -94,13 +94,13 @@ export default function Conversations() {
     //     };
 
     // }, [activeConversation]);
-    useEffect(() => {
-        // read messages when the chat content is mounted
-        if (activeConversation) {
-            readMessagesMutation.mutate(activeConversation);
-        }
+    // useEffect(() => {
+    //     // read messages when the chat content is mounted
+    //     if (activeConversation) {
+    //         readMessagesMutation.mutate(activeConversation);
+    //     }
 
-    }, [activeConversation]);
+    // }, [activeConversation]);
     return (
         <div className="flex h-[calc(100vh-64px)] mt-[64px] bg-gray-50">
             <ConversationsSideBar showSidebar={showSidebar} setShowSidebar={setShowSidebar} activeConversation={activeConversation} setActiveConversation={setActiveConversation} />
