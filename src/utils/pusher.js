@@ -1,6 +1,8 @@
-import Pusher from "pusher-js";
+// src/utils/ably.js
+import Ably from 'ably';
 
-export const pusher = new Pusher('fb4f78300444a170ad34', {
-    cluster: 'mt1', // or your actual cluster
-    forceTLS: false,
+const ably = new Ably.Realtime({
+  key: 'NqC5Tg.0MTl-w:RrqORZNaZYEFtFUctuH62I5hq9Z1He4uGlohBEPNt7A', // Avoid hardcoding; use environment variables
 });
+
+export default ably;

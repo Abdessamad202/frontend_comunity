@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { pusher } from "../utils/pusher";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { sendMessage, typing } from "../apis/apiCalls";
 import { Send, Smile, Image } from "lucide-react";
@@ -14,36 +13,6 @@ const ChatInput = ({ activeConvId ,conversations , setIsTyping ,isTyping }) => {
     })
     const { user } = useUser();
     const messageInputRef = useRef(null);
-    const typingTimeout = setTimeout(() => {
-        setIsTyping(false);
-    }, 3000);
-    useEffect(() => {
-        // Clear previous timeout (if any)
-        // Set a new timeout to turn it off after 3 seconds
-
-        if (isTyping) {
-            typingTimeout
-        }
-
-        return () => {
-            clearTimeout(typingTimeout)
-        }
-    }, [isTyping, setIsTyping])
-    useEffect(() => {
-        messageInputRef.current?.focus();
-        const typingChannelName = `typing.${activeConvId}`;
-        const typingChannel = pusher.subscribe(typingChannelName)
-        typingChannel.bind('typing', function (data) {
-            console.log("is Typing", data);
-
-            if (data.userId !== user.id) {
-                setIsTyping(true);
-            }
-        });
-        return () => {
-            pusher.unsubscribe(typingChannelName);
-        };
-    }, [activeConvId]);
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
@@ -52,7 +21,38 @@ const ChatInput = ({ activeConvId ,conversations , setIsTyping ,isTyping }) => {
     };
     const sendMessageMutation = useMutation({
         mutationFn: (message) => sendMessage(activeConvId, message),
-        
+        onMutate: async (newMessage) => {
+            await queryClient.cancelQueries(['conversations']);
+            const previousConversations = queryClient.getQueryData(['conversations']);
+            const updatedConversations = conversations.map(convo => {
+                if (convo.id === activeConvId) {
+                    return {
+                        ...convo,
+                        messages: [
+                            ...convo.messages,
+                            {
+                                id: convo.messages.length + 1,
+                                sender_id: user.id,
+                                content: newMessage.content,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString(),
+                                read_at: null,
+                            }
+                        ],
+                        last_message_at: new Date().toISOString(),
+                    };
+                }
+                return convo;
+            });
+            queryClient.setQueryData(['conversations'], {
+                ...previousConversations,
+                pages: previousConversations.pages.map(page => ({
+                    ...page,
+                    conversations: updatedConversations,
+                })),
+            });
+            return { previousConversations };
+        },
         onError: (err, newMessage, context) => {
             log("Error sending message: ", err);
             queryClient.setQueryData(['conversations'], context.previousConversations);
@@ -71,27 +71,8 @@ const ChatInput = ({ activeConvId ,conversations , setIsTyping ,isTyping }) => {
             content: "",
         });
     };
-    const typingMutation = useMutation({
-        mutationFn: () => typing(activeConvId),
-        onMutate: () => {
-            console.log("is working");
-        }
-    })
-    const typingTimeoutRef = useRef(null);
-    const handleTyping = (e) => {
-        const { value } = e.target;
-        handleInputChange(e, setMessage)
-
-        if (value.length > 3) {
-            // Clear any existing timeout to prevent overlap
-            clearTimeout(typingTimeoutRef.current);
-
-            // Start a new 300ms timer
-            typingTimeoutRef.current = setTimeout(() => {
-                typingMutation.mutate();
-            }, 300);
-        }
-    };
+    
+   
     return (
         <div className="bg-white border-t border-gray-200 p-3 md:p-4">
             <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-200 transition-all">
@@ -105,7 +86,7 @@ const ChatInput = ({ activeConvId ,conversations , setIsTyping ,isTyping }) => {
                     type="text"
                     name="content"
                     value={message.content}
-                    onChange={e => handleTyping(e)}
+                    onChange={e => handleInputChange(e, setMessage)}
                     placeholder="Type a message"
                     className="flex-1 bg-transparent border-none py-3 px-2 md:px-3 focus:outline-none text-gray-800"
                     onKeyUp={handleKeyPress}

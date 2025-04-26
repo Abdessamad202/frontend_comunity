@@ -23,7 +23,7 @@ export default function Post({ post, className }) {
 
     // Fetch saved posts
     const { data: savedPosts = [] } = useQuery({
-        queryKey: ["saved", user.id],
+        queryKey: ["saved", user?.id],
         queryFn: fetchSavedPosts,
     });
 

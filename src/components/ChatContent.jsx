@@ -10,9 +10,8 @@ import Pusher from "pusher-js";
 import { u } from "framer-motion/client";
 import { handleInputChange } from "../utils/formHelpers";
 import { getToken } from "../utils/localStorage";
-import echo from "../utils/echo";
-import { pusher } from "../utils/pusher";
 import MessageStatus from "./MessageStatus";
+import ably from "../utils/pusher";
 
 export default function ChatContent({ activeConvId, showSidebar, setShowSidebar, showRightPanel, setShowRightPanel }) {
     const queryClient = useQueryClient()
@@ -123,232 +122,17 @@ export default function ChatContent({ activeConvId, showSidebar, setShowSidebar,
     })
     const messageInputRef = useRef(null);
 
-    // const ChatInput = ({ activeConvId }) => {
-    //     const [isTyping, setIsTyping] = useState(false)
-    //     const [message, setMessage] = useState({
-    //         content: "",
-    //     })
-    //     const typingTimeout = setTimeout(() => {
-    //         setIsTyping(false);
-    //     }, 3000);
-    //     useEffect(() => {
-    //         // Clear previous timeout (if any)
-    //         // Set a new timeout to turn it off after 3 seconds
-
-    //         if (isTyping) {
-    //             typingTimeout
-    //         }
-
-    //         return () => {
-    //             clearTimeout(typingTimeout)
-    //         }
-    //     }, [isTyping, setIsTyping])
-    //     useEffect(() => {
-    //         messageInputRef.current?.focus();
-    //         const typingChannelName = `typing.${activeConvId}`;
-    //         const typingChannel = pusher.subscribe(typingChannelName)
-    //         typingChannel.bind('typing', function (data) {
-    //             console.log("is Typing", data);
-
-    //             if (data.userId !== user.id) {
-    //                 setIsTyping(true);
-    //             }
-    //         });
-    //         return () => {
-    //             pusher.unsubscribe(typingChannelName);
-    //         };
-    //     }, [activeConvId]);
-
-    //     const handleKeyPress = (e) => {
-    //         if (e.key === 'Enter') {
-    //             handleSendMessage();
-    //         }
-    //     };
-    //     const sendMessageMutation = useMutation({
-    //         mutationFn: (message) => sendMessage(activeConvId, message),
-    //         onMutate: async (newMessage) => {
-    //             await queryClient.cancelQueries(['conversations']);
-    //             const previousConversations = queryClient.getQueryData(['conversations']);
-    //             const updatedConversations = conversations.map(convo => {
-    //                 if (convo.id === activeConvId) {
-    //                     return {
-    //                         ...convo,
-    //                         messages: [
-    //                             ...convo.messages,
-    //                             {
-    //                                 id: convo.messages.length + 1,
-    //                                 sender_id: user.id,
-    //                                 content: newMessage.content,
-    //                                 created_at: new Date().toISOString(),
-    //                                 updated_at: new Date().toISOString(),
-    //                                 status: "sent",
-    //                             }
-    //                         ],
-    //                         last_message_at: new Date().toISOString(),
-    //                     };
-    //                 }
-    //                 return convo;
-    //             });
-    //             queryClient.setQueryData(['conversations'], {
-    //                 ...previousConversations,
-    //                 pages: previousConversations.pages.map(page => ({
-    //                     ...page,
-    //                     conversations: updatedConversations,
-    //                 })),
-    //             });
-    //             return { previousConversations };
-    //         },
-    //         onError: (err, newMessage, context) => {
-    //             log("Error sending message: ", err);
-    //             queryClient.setQueryData(['conversations'], context.previousConversations);
-    //         },
-    //         onSuccess: () => {
-    //             scrollToBottom();
-    //             messageInputRef.current?.focus();
-    //         },
-    //         onSettled: () => {
-    //             queryClient.invalidateQueries(['conversations']);
-    //         },
-    //     });
-    //     const handleSendMessage = () => {
-
-    //         if (messageInputRef.current?.value?.trim() === "") return;
-    //         // if (messageInputRef.current && messageInputRef.current?.value) {
-    //         message.content = messageInputRef.current.value;
-    //         // }
-    //         sendMessageMutation.mutate(message);
-    //         messageInputRef.current.value = '';
-    //         // setMessage('');
-
-    //         // const updatedConversations = conversations.map(convo => {
-    //         //     if (convo.id === activeConvId) {
-    //         //         return {
-    //         //             ...convo,
-    //         //             messages: [
-    //         //                 ...convo.messages,
-    //         //                 {
-    //         //                     id: convo.messages.length + 1,
-    //         //                     sender: "me",
-    //         //                     text: message,
-    //         //                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    //         //                     status: "sent"
-    //         //                 }
-    //         //             ]
-    //         //         };
-    //         //     }
-    //         //     return convo;
-    //         // });
-
-    //         // setActiveConvo(updatedConversations);
-    //         // setMessage("");
-
-    //         // Simulate reply after a delay
-    //         // setTimeout(() => {
-    //         //     const updatedWithReply = conversations.map(convo => {
-    //         //         if (convo.id === activeConvId) {
-    //         //             return {
-    //         //                 ...convo,
-    //         //                 messages: [
-    //         //                     ...convo.messages,
-    //         //                     {
-    //         //                         id: convo.messages.length + 1,
-    //         //                         sender: "me",
-    //         //                         text: message,
-    //         //                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    //         //                         status: "sent"
-    //         //                     },
-    //         //                     {
-    //         //                         id: convo.messages.length + 2,
-    //         //                         sender: "them",
-    //         //                         text: "I'll review this information and get back to you shortly. Thanks for the update.",
-    //         //                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    //         //                         status: "sent"
-    //         //                     }
-    //         //                 ]
-    //         //             };
-    //         //         }
-    //         //         return convo;
-    //         //     });
-
-    //         //     setActiveConvo(updatedWithReply);
-    //         // }, 2000);
-    //     };
-    //     const typingMutation = useMutation({
-    //         mutationFn: () => typing(activeConvId),
-    //         onMutate: () => {
-    //             console.log("is working");
-    //         }
-    //     })
-    //     const typingTimeoutRef = useRef(null);
-
-    //     const handleTyping = (e) => {
-    //         const {value} = e.target;
-    //         handleInputChange(e,setMessage)
-
-    //         if (value.length > 3) {
-    //             // Clear any existing timeout to prevent overlap
-    //             clearTimeout(typingTimeoutRef.current);
-
-    //             // Start a new 300ms timer
-    //             typingTimeoutRef.current = setTimeout(() => {
-    //                 typingMutation.mutate();
-    //             }, 300);
-    //         }
-    //     };
-    //     return (
-    //         <div className="bg-white border-t border-gray-200 p-3 md:p-4">
-    //             <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-200 transition-all">
-    //                 <div className="flex space-x-1 pl-2 md:pl-3">
-    //                     <button className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600 transition-colors hidden sm:block">
-    //                         <Image size={18} />
-    //                     </button>
-    //                 </div>
-    //                 <input
-    //                     ref={messageInputRef}
-    //                     type="text"
-    //                     name="content"
-    //                     value={message.content}
-    //                     onChange={handleTyping}
-    //                     placeholder="Type a message"
-    //                     className="flex-1 bg-transparent border-none py-3 px-2 md:px-3 focus:outline-none text-gray-800"
-    //                     onKeyUp={handleKeyPress}
-    //                 />
-    //                 <div className="flex pr-2 md:pr-3">
-    //                     <button className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600 transition-colors">
-    //                         <Smile size={18} />
-    //                     </button>
-    //                     {message.content?.trim() ? (
-    //                         <button
-    //                             onClick={handleSendMessage}
-    //                             className="p-1.5 rounded-md hover:bg-indigo-100 text-indigo-600 transition-colors"
-    //                         >
-    //                             <Send size={18} />
-    //                         </button>
-    //                     ) : (
-    //                         <button className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600 transition-colors">
-    //                             <Mic size={18} />
-    //                         </button>
-    //                     )}
-    //                 </div>
-    //             </div>
-
-    //             {/* Typing indicator (optional) */}
-    //             {isTyping && (
-    //                 <div className="px-2 mt-1">
-    //                     <p className="text-xs text-gray-500 italic">{participant?.profile.name} is typing...</p>
-    //                 </div>
-    //             )}
-    //         </div>
-    //     )
-    // }
     useEffect(() => {
         if (!activeConvId) return;
+        // Subscribe to the channel
         const chatChannelName = `chat.${activeConvId}`;
-        const chatChannel = pusher.subscribe(chatChannelName);
+        console.log("Subscribing to channel:", chatChannelName);
 
-        chatChannel.bind('message-sent', (data) => {
+        // Subscribe to the channel and listen for 'message-sent'
+        const channel = ably.channels.get(`conversation.${activeConvId}`);
+        channel.subscribe('message-sent', (data) => {
             console.log("Received via Pusher: ", data);
-            // if (data.message.sender_id === user.id) return;
+            // Handle received data and update state
             queryClient.setQueryData(['conversations'], (oldData) => {
                 if (!oldData) return oldData;
 
@@ -358,17 +142,9 @@ export default function ChatContent({ activeConvId, showSidebar, setShowSidebar,
                         ...page,
                         conversations: page.conversations.map(conv => {
                             if (conv.id === activeConvId) {
-                                // Prepare new message
                                 let newMessage = data.message;
 
-                                // // If it's the current user's sent message, mark it as read
-                                // if (data.message.sender_id === user.id) {
-                                //     newMessage = {
-                                //         ...newMessage,
-                                //         read_at: new Date().toISOString()
-                                //     };
-                                // }
-
+                                // Add new message to conversation
                                 return {
                                     ...conv,
                                     messages: [...conv.messages, newMessage]
@@ -380,15 +156,14 @@ export default function ChatContent({ activeConvId, showSidebar, setShowSidebar,
                 };
             });
 
-            // Scroll after state update
+            // Scroll to bottom (if necessary)
             scrollToBottom();
             messageInputRef.current?.focus();
         });
 
-
-        // Cleanup
+        // Cleanup subscription on component unmount
         return () => {
-            pusher.unsubscribe(chatChannelName);
+            channel.unsubscribe(chatChannelName);
         };
 
     }, [activeConvId]);

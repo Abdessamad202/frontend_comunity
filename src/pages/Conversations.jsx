@@ -4,7 +4,6 @@ import ChatContent from "../components/ChatContent";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useUser from "../hooks/useUser";
 import { readMessages } from "../apis/apiCalls";
-import { pusher } from "../utils/pusher";
 
 export default function Conversations() {
     const [activeConversation, setActiveConversation] = useState(null);
